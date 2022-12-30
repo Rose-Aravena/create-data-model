@@ -1,0 +1,52 @@
+CAMPO BBDD,IO,TIPO,ÁMBITO,DESCRIPCIÓN,REQUERIDO
+ds_id_orden,Entrada,Integer,Datos de salida,Identificador de orden,S�
+ds_estado,Entrada,Varchar(20),Datos de salida,Estado de la inspecci�n,S�
+ds_clave_acceso (1),Entrada,Varchar (5),Datos de salida,Claves de Inspecci�n,S�
+ds_cnr_normal,Entrada,Varchar (10),Datos de salida,,S�
+ds_codigo_situacion (2),Entrada,Varchar (3),Datos de salida,C�digo situaci�n il�cito,S�
+ds_accion1,Entrada,Integer,Datos de salida,Acci�n realizada en inspecci�n,S�
+ds_accion2,Entrada,Integer,Datos de salida,Acci�n realizada en inspecci�n,S�
+ds_motivo_cambio (3),Entrada,Varchar (3),Datos de salida,C�digo de motivo cambio medidor,S�
+ds_accion_pendiente (4),Entrada,Integer,Datos de salida,C�digo acciones pendientes inspecci�n,S�
+ds_tipo_cliente (5),Entrada,Varchar (3),Datos de salida,C�digo respectivo a la naturaleza del cliente,S�
+ds_condicion_propiedad (6),Entrada,Varchar (3),Datos de salida,C�digo relaci�n legal del cliente con la propiedad,S�
+ds_nombre_encuestado,Entrada,Varchar (50),Datos de salida,Nombre persona encuestada en inspecci�n,S�
+ds_rut,Entrada,Varchar (15),Datos de salida,RUT persona encuestada en inspecci�n,S�
+ds_relacion (7),Entrada,Varchar (3),Datos de salida,Relaci�n del encuestado con cliente objetivo de la inspecci�n,S�
+ds_resultado (8),Entrada,Integer,Datos de salida,C�digo del resultado de la inspecci�n de il�cito,S�
+ds_fecha_citacion,Entrada,Date,Datos de salida,AAAAMMDD. Fecha citaci�n a sucursal en caso de aplicar,S�
+ds_cargo_cambio_medidor,Entrada,Integer,Datos de salida,Cargo a cliente por cambio de medidor,S�
+ds_cargo_presunto,Entrada,Integer,Datos de salida,,S�
+ds_cargo_inspeccion,Entrada,Integer,Datos de salida,Cargo a cliente por inspecci�n,S�
+ds_cargo_registro_fotografico,Entrada,Integer,Datos de salida,,S�
+ds_cargo_sellado,Entrada,Integer,Datos de salida,Cargo a cliente por sellado,S�
+ds_cargo_regularizacion_arranques,Entrada,Integer,Datos de salida,,S�
+ds_total_cargos,Entrada,Integer,Datos de salida,Total cargos al cliente,S�
+ds_metros_cubicos,Entrada,Integer,Datos de salida,,S�
+ds_formulario_cobro_boleta,Entrada,Varchar (3),Datos de salida,Opciones: S� - No,S�
+ds_formulario_reconoce_irregularidad,Entrada,Varchar (3),Datos de salida,Opciones: S� - No,S�
+ds_numero_notificacion,Entrada,Integer,Datos de salida,Identificador de notificaci�n,S�
+ds_numero_constancia_carabineros,Entrada,Integer,Datos de salida,N�mero identificador de constancia de Carabineros,S�
+ds_constancia_notarial,Entrada,Varchar (3),Datos de salida,Opciones: S� - No,S�
+ds_nro_medidor_instalado,Entrada,Integer,Datos de salida,N�mero identificador medidor instalado,S�
+ds_marca_medidor_instalado (9),Entrada,Varchar (3),Datos de salida,C�digo marca medidor,S�
+ds_diametro (10),Entrada,Integer,Datos de salida,,S�
+ds_lectura_instalada,Entrada,Integer,Datos de salida,,S�
+ds_lectura_retiro,Entrada,Integer,Datos de salida,,S�
+ds_observacion_cambio,Entrada,Varchar (150),Datos de salida,,S�
+ds_fecha_instalacion,Entrada,Date,Datos de salida,AAAAMMDD. Fecha de instalaci�n ,S�
+ds_correctivo_preventivo,Entrada,Boolean,Datos de salida,Opciones: V= Correctivo F= Preventivo,S�
+ds_estrato_socioeconomico (11),Entrada,Integer,Datos de salida,C�digo estrato socioecon�mico cliente,S�
+ds_volumen_prueba,Entrada,Integer,Datos de salida,Volumen prueba inspecci�n,S�
+ds_volumen_encontrado,Entrada,Integer,Datos de salida,Volumen resultado de prueba de inspecci�n,S�
+ds_observacion_inspeccion,Entrada,Varchar (150),Datos de salida,Observaciones o comentarios de la inspecci�n,S�
+ds_situacion_normal (12),Entrada,Integer,Datos de salida,C�digo situaci�n inspecci�n,S�
+ds_situacion_medidor_normal (13),Entrada,Varchar (3),Datos de salida,C�digo situaci�n medidor inspecci�n,S�
+ds_situacion_sello_normal (14),Entrada,Integer,Datos de salida,C�digo situaci�n sello inspecci�n,S�
+ds_accion_medicion (15),Entrada,Integer,Datos de salida,C�digo acci�n medici�n de la inspecci�n,S�
+ds_lectura_inspeccion,Entrada,Integer,Datos de salida,,S�
+ds_nombre_contacto,Entrada,Varchar (50),Datos de salida,Nombre de contacto en la medici�n,S�
+ds_fono_contacto,Entrada,Integer,Datos de salida,Tel�fono de contacto en la medici�n,S�
+ds_fecha_inspeccion,Entrada,Date,Datos de salida,AAAAMMDD. Fecha de la inspecci�n,S�
+ds_hora_inspeccion,Entrada,Date,Datos de salida,HHMMSS. Hora de la inspecci�n,S�
+ds_codigo_cuadrilla,Entrada,Integer,Datos de salida,C�digo cuadrilla de inspecci�n,S�

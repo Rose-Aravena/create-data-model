@@ -1,0 +1,26 @@
+{
+  "name": "create-data-model",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TrinidadMedina/create-data-model.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TrinidadMedina/create-data-model/issues"
+  },
+  "homepage": "https://github.com/TrinidadMedina/create-data-model#readme",
+  "dependencies": {
+    "csv-parse": "^5.3.3",
+    "dotenv": "^16.0.3",
+    "knex": "^2.3.0",
+    "oracledb": "^5.5.0"
+  }
+}
