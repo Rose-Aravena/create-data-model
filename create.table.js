@@ -8,7 +8,6 @@ let allTables;
 const getAllMaintableFiles = async () => {
     const file = await fs.promises.readdir('./tables/maintable');
     allTables = await knex.select('TABLE_NAME').from('ALL_TABLES').where('OWNER', 'PLAYGROUND');
-    console.log(allTables)
     parsingCsvMainTable(file)
 }
 
@@ -20,11 +19,7 @@ const parsingCsvMainTable = async (files) => {
                 console.error(err.message)
             }
             data.forEach( i => {
-                delete i.IO;
-                delete i.ÁMBITO;
-                delete i.DESCRIPCIÓN;
-                delete i.REQUERIDO;
-                i['CAMPO BBDD'] = i['CAMPO BBDD']
+                i['campos'] = i['campos']
                                     .replace(/ds_/, '')
                                     .replace(/ /g, '')
                                     .replace(/formulario/g, 'form')
@@ -34,20 +29,39 @@ const parsingCsvMainTable = async (files) => {
                                     .toUpperCase()
                                     .replace(/ /gi, '_')
                                     .replace(/(\([^\)]*\))/g, '');
-                if(i['CAMPO BBDD'].length > 24 ){
-                    i['CAMPO BBDD'] = i['CAMPO BBDD'].slice(0, 24-i['CAMPO BBDD'].length);
+                if(i['campos'].length > 30 ){
+                    i['campos'] = i['campos'].slice(0, 30-i['campos'].length);
                 }
             })
-
-            console.log(data)
             let newstr = file.replace(/.csv/gi, '');
             newstr = newstr.normalize('NFD').replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/ /gi, '_')
-            if(newstr.length > 24){
-                newstr = newstr.slice(0, 24-newstr.length);
+            if(newstr.length > 30){
+                newstr = newstr.slice(0, 30-newstr.length);
             };
-            
+            for (let i=0; i < data.length; i++){
+                let type = data[i]['Tipo'];
+                data[i].params = null;
+                if(type.startsWith('NUMBER')){
+                    const num = type.match(/\((.*?)\)/);
+                    if(!num){
+                        data[i]['Tipo'] = 'INTEGER';
+                    }else if(!num[1].includes(',')){
+                        data[i]['Tipo'] = 'INTEGER';
+                        data[i].params = num[1];
+                    }
+                    else{
+                        data[i]['Tipo'] = 'FLOAT';
+                        const params = num[1].split(',')
+                        data[i].params = params;
+                    }
+                } else if(type.match(/(\d+)/g)){
+                    data[i].params = type.match(/(\d+)/g)[1] ||  type.match(/(\d+)/g)[0]
+                    data[i]['Tipo'] = 'VARCHAR';
+                };
+            } 
+            //console.log(data)           
             //await createMainTable(newstr, data);
-            //await createForeignKeys(newstr, data)
+            await createForeignKeys(newstr, data)
         });
     })
 };
@@ -55,31 +69,29 @@ const parsingCsvMainTable = async (files) => {
 const createMainTable = async (tableName, columns) => {
     try{
         await knex.schema.createTable(tableName, (table) => {
-            table.integer(columns[0]['CAMPO BBDD']).primary();
+            table.integer(columns[0]['campos'], [columns[0]['params']]).primary();
             for (i=1; i < columns.length; i++){
-                let type = columns[i]['TIPO'];
-                let name = columns[i]['CAMPO BBDD'];
-                const regex = /(\d+)/g;
-                let varcharLength;
-                if(type.match(regex)){
-                    varcharLength = parseInt(type.match(regex))
-                    type = 'Varchar';
-                };
+                let type = columns[i]['Tipo'];
+                let name = columns[i]['campos'];
+                let params = columns[i]['params']
                 switch (type) {
-                    case 'Varchar':
-                        table.string(name, [varcharLength])
+                    case 'VARCHAR':
+                        table.string(name, [params]).unsigned()
                         break;
-                    case 'Integer':
-                        table.integer(name)
+                    case 'INTEGER':
+                        table.integer(name, [params]).unsigned()
                         break;
-                    case 'Date':
-                        table.date(name)
+                    case 'FLOAT':
+                        table.float(name, [params[0]], [params[1]]).unsigned()
                         break;
-                    case 'Boolean':
-                        table.boolean(name)
+                    case 'DATE':
+                        table.date(name).unsigned()
                         break;
-                    case 'Geometry':
-                        table.geometry(name)
+                    case 'BOOLEAN':
+                        table.boolean(name).unsigned()
+                        break;
+                    case 'GEOMETRY':
+                        table.geometry(name).unsigned()
                         break;
                 }
             }
@@ -87,48 +99,47 @@ const createMainTable = async (tableName, columns) => {
         console.info('Table created');
     }catch(err) {
         console.error(err)
-    }finally{
-        knex.destroy()
     }
 }
 
 const createManualForeignKeys = async () => {
     try{
         await knex.schema.table('ILICITOS', table => {
-            table.foreign('ACCION_MEDICION').references('IDENTIFICADOR').inTable('SUB_ACCION_MEDICION')
+            table.foreign('ACCION_MEDICION').references('IDENTIFICADOR').inTable('SUB_ACCION_MEDICION').onDelete('CASCADE')
         })
         console.log('FK created')
     }catch(err){
-        console.error(err.message)
+        console.error(err)
     }finally{
         knex.destroy()
     }
 }
 
-const createForeignKeys = async (newstr, data) => {
-    const columnsWithFK = data.filter( column => column['CAMPO BBDD'].includes('('));
-    const nameColumnsWithFK = columnsWithFK.map( i => i['CAMPO BBDD']);
-    let foreignColumn;
-    nameColumnsWithFK.forEach( i => {
-        const number = i.match(/(\d+)/g);
-        const tableRegex = new RegExp("\\b"+number+"\\b");
-        allTables.forEach( t => {
-            if(t.TABLE_NAME.match(tableRegex)){
-                knex.select().from(t.TABLE_NAME).then( data => {
-                    foreignColumn = Object.keys(data[0])[0];
-                    knex.schema.table(newstr, table => {
-                        table.foreign(i).references(foreignColumn).inTable(t.TABLE_NAME)
-                    }).then(console.log).catch(console.log)
-                    console.log(typeof newstr, typeof i, typeof foreignColumn, typeof t.TABLE_NAME)
-                })
-
+const createForeignKeys = async (tableName, columns) => {
+    const allColumns = columns.map( col => col.campos);
+    const allTablesNames = allTables.map( table => table.TABLE_NAME)
+    allTablesNames.forEach( subTable => {
+        allColumns.forEach( async col => {
+            if(subTable.includes(col)){
+                try{
+                    const data = await knex.select().from(subTable);
+                    const foreignColumn = Object.keys(data[0])[0];
+                    await knex.schema.table(tableName, table => {
+                        table.foreign(col).references(foreignColumn).inTable(subTable)
+                    })
+                    console.info('FK created')
+                }catch(err){
+                    console.error(1, err)
+                }
             }
         })
     })
-}
-
+};
 
 getAllMaintableFiles();
 //createManualForeignKeys();
+
+
+
 
 
