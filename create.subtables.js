@@ -3,8 +3,12 @@ const knex = require('knex')(knexConfig);
 const parse = require('csv-parse').parse;
 const fs = require('fs');
 
+let mainTable;
+
 const getAllSubtablesFiles = async () => {
     const files = await fs.promises.readdir('./tables/subtables');
+    const mainTableData = await knex('GIS37_GEOGOTA_GIS38').columnInfo();
+    mainTable = Object.keys(mainTableData);
     parsingCsvSubTables(files)
 }
 
@@ -19,39 +23,37 @@ const parsingCsvSubTables = async (files) => {
             for (let i = 0; i < data.length; i++){
                 for(const [key, value] of Object.entries(data[i])){
                     const newKey = key.normalize('NFD').replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/ /gi, '_');
-                    data[i][newKey] = value;
+                    const newValue = value.normalize('NFD').replace(/[\u0300-\u036f]/g,"").trim();
+                    data[i][newKey] = newValue;
                     delete data[i][key];
-                } 
-            }
-            data.forEach(row => {
-                if(Object.values(row)[0].match(lettersReg)){
-                    data.type = 'string'
-                }else{
-                    data.type = 'integer'
-                }
-            });
+                }   
+            };
             const headers = Object.keys(data[0]);
-            let newstr = file.replace(/.csv/gi, '');
-            await createSubTable(newstr, headers, data.type);
-            await insertData(newstr, data);
-            //await dropTable(newstr)
+            let tableName = file.replace(/.csv/gi, '');
+            await createSubTable(tableName, headers);
+            await insertData(tableName, data);
+            //await dropTable(tableName)
         });
     })
  };
 
-const createSubTable = async (tableName, columns, dataType) => {
+const createSubTable = async (tableName, columns) => {
     try{
        await knex.schema.createTable(tableName, table => {
-        dataType === 'string' ? table.string(columns[0]).primary() : table.integer(columns[0]).primary(); 
-        for (i=1; i < columns.length; i++){
-            table.string(columns[i])
-        }
+            if(tableName === 'SUB_COD_CUADRILLA'){
+                table.string(columns[0]);
+            }else if(tableName === 'SUB_COD_EMPRESA'){
+                table.integer(columns[0]).primary();
+            }else{
+                /* dataType === 'string' ? */ table.string(columns[0]).primary() /* : table.integer(columns[0]).primary();  */
+            }
+            for (i=1; i < columns.length; i++){
+                table.string(columns[i])
+            }
         })
         console.info('Table created');
     }catch(err) {
         console.error(err.message)
-    }finally{
-        knex.destroy()
     }
 }
 
@@ -61,8 +63,6 @@ const insertData = async (tableName, data) => {
         console.info('Data inserted')
     }catch(err){
         console.error(err.message)
-    }finally{
-        knex.destroy()
     }
 }
 
@@ -72,8 +72,6 @@ const dropTable = async (tableName) => {
         console.info('Table droped')
     }catch(err){
         console.error(err.message)
-    }finally{
-        knex.destroy()
     }
 }
 
@@ -89,5 +87,17 @@ const viewInfo = async () => {
     }
 };
 
-viewInfo()
-//getAllSubtablesFiles();
+//viewInfo()
+getAllSubtablesFiles();
+
+/*data.forEach(row => {
+    if(Object.values(row)[0].match(lettersReg)){
+        data.type = 'string'
+    }else{
+        data.type = 'integer'
+    }
+}); */
+
+/*if(tableName.includes(mainTable[i])){
+    console.log(tableName, mainTable[i])
+} */
