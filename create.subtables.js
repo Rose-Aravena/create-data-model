@@ -48,7 +48,9 @@ const createSubTable = async (tableName, columns) => {
                 /* dataType === 'string' ? */ table.string(columns[0]).primary() /* : table.integer(columns[0]).primary();  */
             }
             for (i=1; i < columns.length; i++){
-                table.string(columns[i])
+                table.string(columns[i]);
+                //caso cod_cuadrilla
+                //table.primary([columns[0], columns[1], columns[2]])
             }
         })
         console.info('Table created');
