@@ -61,7 +61,7 @@ const createSubTable = async (tableName, columns) => {
 
 const insertData = async (tableName, data) => {
     try{
-        await knex(tableName).insert(data);
+        await knex(tableName).insert(data); //insert(arreglo de objetos)
         console.info('Data inserted')
     }catch(err){
         console.error(err.message)
