@@ -50,18 +50,21 @@ const parsingCsvMainTable = async (files) => {
                         data[i].params = num[1];
                     }
                     else{
-                        data[i]['Tipo'] = 'FLOAT';
+                        data[i]['Tipo'] = 'DECIMAL';
                         const params = num[1].split(',')
                         data[i].params = params;
                     }
-                } else if(type.match(/(\d+)/g)){
-                    data[i].params = type.match(/(\d+)/g)[1] ||  type.match(/(\d+)/g)[0]
+                } else if(type.startsWith('VARCHAR2')){
+                    data[i].params = type.match(/(\d+)/g)[1];
                     data[i]['Tipo'] = 'VARCHAR';
-                };
+                }  else if(type.startsWith('CHAR')){
+                    data[i].params = type.match(/(\d+)/g);
+                    data[i]['Tipo'] = 'CHAR';
+                }
             } 
             //console.log(data)           
-            //await createMainTable(newstr, data);
-            await createForeignKeys(newstr, data)
+            await createMainTable(newstr, data);
+            //await createForeignKeys(newstr, data)
         });
     })
 };
@@ -78,11 +81,14 @@ const createMainTable = async (tableName, columns) => {
                     case 'VARCHAR':
                         table.string(name, [params]).unsigned()
                         break;
-                    case 'INTEGER':
-                        table.integer(name, [params]).unsigned()
+                    case 'CHAR':
+                        table.specificType(name, `char(${params})`);
                         break;
-                    case 'FLOAT':
-                        table.float(name, [params[0]], [params[1]]).unsigned()
+                    case 'INTEGER':
+                        params? table.integer(name, [params]).unsigned() : table.integer(name).unsigned()
+                        break;
+                    case 'DECIMAL':
+                        table.decimal(name, [params[0]], [params[1]]).unsigned()
                         break;
                     case 'DATE':
                         table.date(name).unsigned()
