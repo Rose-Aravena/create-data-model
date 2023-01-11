@@ -63,8 +63,10 @@ const parsingCsvMainTable = async (files) => {
                 }
             } 
             //console.log(data)           
-            await createMainTable(newstr, data);
-            //await createForeignKeys(newstr, data)
+            //await createMainTable(newstr, data);
+            //await createForeignKeys(newstr, data);
+            //await insertData(newstr);
+            await createView(newstr)
         });
     })
 };
@@ -141,6 +143,64 @@ const createForeignKeys = async (tableName, columns) => {
         })
     })
 };
+
+const insertData = async (tableName) => {
+    try{
+        const data = await fs.promises.readFile(`./data.falsa.ilicitos.csv`, 'utf-8');
+        parse(data, {delimiter: ',', columns:true, skip_empty_lines: true}, async (err, data) => {
+            if (err) {
+                console.error(err.message)
+            }
+        await knex(tableName).insert(data); //insert(arreglo de objetos)
+        console.info('Data inserted')
+        });
+    }catch(err){
+        console.error(err.message)
+    }
+};
+
+const createView = async (tableName) => {
+    try{
+        await knex.schema.createView(`V_${tableName}`, view => {
+            view.as(knex(tableName)
+                .join("SUB_COD_EMPRESA", "GIS37_GEOGOTA_GIS38.COD_EMPRESA", "=", "SUB_COD_EMPRESA.CODIGO")           
+                .select('COD_EMPRESA', 'SUB_COD_EMPRESA.NOMBRE_EMPRESA'));
+        });
+        console.info('View created')
+    }catch(err){
+        console.error(err)
+    }
+};
+
+/* knex.schema.createView('users_view', function (view) {
+    view.columns(['first_name']);
+    view.as(knex('users').select('first_name').where('age','>', '18'));
+}) */
+
+// const createView = (
+//   nombre_vista,
+//   nombre_tabla_ppal,
+//   nombre_subtabla,
+//   campo_pk
+// ) => {
+//   knex.schema
+//     .createView("nombre_view", function (view) {
+//       view.as(
+//         knex("nombre_tabla_principal")
+//           .join(
+//             "nombre_subtabla",
+//             "nombre_tabla_principal.nombre_campo_primary_key",
+//             "=",
+//             "nombre_subtabla.nombre_campo_foreign_key"
+//           )
+
+//           .select("False_Table.Id", "SUB_ACCION_CAMBIO.TIPO_ACCION")
+//       );
+//     })
+//     .then(() => {
+//       console.log("Estamos ok");
+//     });
+// };
 
 getAllMaintableFiles();
 //createManualForeignKeys();
